@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import XLSX from 'xlsx';
+import { Platform } from 'react-native';
 
 const STORAGE_KEY = 'expenses_data';
 
@@ -75,16 +76,23 @@ export const deleteTransaction = async (id) => {
  */
 export const exportToExcel = async () => {
     try {
-        const data = await getTransactions();
+        const allData = await getTransactions();
+        // Filter only expenses as requested
+        const data = allData.filter(t => t.type === 'expense');
+
         if (data.length === 0) {
-            // You might want to handle this UI side, but returning false/null signals empty
             return false;
         }
 
-        // Convert data to suitable format if needed or dump directly
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Expenses");
+
+        if (Platform.OS === 'web') {
+            // On web, this triggers a file download
+            XLSX.writeFile(wb, 'expenses.xlsx');
+            return true;
+        }
 
         const wbout = XLSX.write(wb, { type: 'base64', bookType: "xlsx" });
         const uri = FileSystem.cacheDirectory + 'expenses.xlsx';
