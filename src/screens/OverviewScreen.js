@@ -4,7 +4,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { getTransactions } from '../utils/storage';
 import { theme } from '../utils/theme';
 import { Card } from '../components/Card';
-import { PieChart } from 'react-native-svg-charts';
 import { isThisMonth, parseISO } from 'date-fns';
 
 export default function OverviewScreen() {
@@ -45,27 +44,6 @@ export default function OverviewScreen() {
         setRefreshing(true);
         loadData().then(() => setRefreshing(false));
     }, []);
-
-    const chartData = [
-        {
-            key: 1,
-            value: data.expense,
-            svg: { fill: theme.colors.primary },
-            arc: { outerRadius: '100%', innerRadius: '75%' }
-        },
-        {
-            key: 2,
-            value: data.income - data.expense > 0 ? data.income - data.expense : 0, // Visualizing savings
-            svg: { fill: theme.colors.secondary },
-            arc: { outerRadius: '100%', innerRadius: '75%' }
-        }
-    ];
-
-    // If both are 0, use a gray placeholder
-    if (data.income === 0 && data.expense === 0) {
-        chartData[0] = { key: 1, value: 100, svg: { fill: theme.colors.surfaceLight }, arc: { outerRadius: '100%', innerRadius: '75%' } };
-        chartData.pop();
-    }
 
 
     return (
